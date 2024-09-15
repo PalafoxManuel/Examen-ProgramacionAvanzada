@@ -1,24 +1,192 @@
 <!-- Examen Unidad 2 -->
 <!DOCTYPE html>
 <html>
+
 <head>
+    <link rel="icon" href="evilPacman.png" type="image/x-icon">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,
     initial-scale=1">
-    <title>Examen</title>
+    <title>EvilPacman</title>
     <style type="text/css">
-        canvas{
-            background-color: rgb(41, 9, 219);
+        canvas {
+            background-color: rgb(18, 18, 20);
+        }
+
+        body {
+            background-color: darkgray;
         }
     </style>
 </head>
+
 <body>
-    <canvas id="my_canvas" width="500" height="900"></canvas>
+    <canvas id="my_canvas" width="800" height="900"></canvas>
 
     <script type="text/javascript">
+        const my_canvas = document.getElementById('my_canvas')
+        const ctx = my_canvas.getContext('2d')
+
+        // Declaracion de variables 
+        var pacmans= [];
+        var direction = "";
+        var speed = 3;
+        var isOut = false;
+        var pause = false;
+        var spawnx = 0;
+        var spawny = 0;
+
+        const imgPlayer = new Image();
+        const imgEnemy = new Image();
+
+        imgPlayer.src = "red.png";
+        imgEnemy.src = "evilPacman.png";
+
+        // Clases
+
+        // Jugador
+        class player {
+            constructor(x, y, h, a, image, speed) {
+                this.x = x;
+                this.y = y;
+                this.h = h;
+                this.a = a;
+                this.image = image;
+                this.speed = speed;
+            }
+        }
+
+        // Obstaculos
+        class enemy {
+            constructor(x, y, h, a, image, speed, direction) {
+                this.x = x;
+                this.y = y;
+                this.h = h;
+                this.a = a;
+                this.image = image;
+                this.speed = speed;
+                this.direction = direction;
+            }
+
+            move(){
+                if(this.direction == "left") {
+                    this.x -= this.speed;
+                    if(this.x < this.a) {
+                        this.x = 800 + this.a;
+                    }
+                } else {
+                    this.x += this.speed;
+                    if(this.x > 800 + this.a) {
+                        this.x = -this.a;
+                    }
+                }
+            }
+        }
+
+        // Zonas seguras
+        class safeZone {
+            constructor(x, y, h, a, color) {
+                this.x = x;
+                this.y = y;
+                this.h = h;
+                this.a = a;
+            }
+        }
+
+        const ghost = new player(250, 850, 30, 30, imgPlayer, speed);
+
+        for(i=0; i<=20;i++){
+            while(!isOut){
+                spawnx = Math.random() < 0.5 ? -35 : 800;
+                spawny = Math.floor(Math.random()* 790);
 
 
+
+                const direction = spawnx === -35 ? "right" : "left";
+
+                pacmans.push(new enemy(spawnx, spawny, 35, 35, imgEnemy, speed, direction));
+                isOut = true;
+            }
+            isOut=false;
+        }
+
+        // Teclas de juego
+        document.addEventListener("keydown", function (e) {
+
+            if (e.keyCode == 87) {
+                direction = "up";
+            } else if (e.keyCode == 65) {
+                direction = "left";
+            } else if (e.keyCode == 83) {
+                direction = "down";
+            } else if (e.keyCode == 68) {
+                direction = "right";
+            } else if (e.keyCode == 80) {
+                pause = !pause;
+            }
+
+        });
+
+        // Movimiento del jugador
+        function update() {
+            if (!pause) {
+                if (direction == "up") {
+                    ghost.y -= (speed);
+                    if (ghost.y <= 0) {
+                        ghost.y = 0;
+                    }
+                } else if (direction == "left") {
+                    ghost.x -= (speed);
+                    if (ghost.x <= 0) {
+                        ghost.x = 0;
+                    }
+                } else if (direction == "down") {
+                    ghost.y += (speed);
+                    if (ghost.y > 875) {
+                        ghost.y = 875;
+                    }
+                } else if (direction == "right") {
+                    ghost.x += (speed);
+                    if (ghost.x >= 775) {
+                        ghost.x = 775;
+                    }
+                }
+            }
+
+
+        }
+
+        // Pintar
+        function showGame(){
+            ctx.fillStyle = "rgb(18, 18, 20)";
+            ctx.fillRect(0,0,800,900);
+
+            pacmans.forEach(function (pacman, index, array) { 
+
+                pacman.move();
+
+                if(pacman.direction === "right") {
+                    ctx.save();
+                    ctx.scale(-1, 1);
+
+                    ctx.drawImage(imgEnemy, -pacman.x - pacman.a,pacman.y,pacman.a,pacman.h);
+                    ctx.restore();
+                }else{
+                    ctx.drawImage(imgEnemy,pacman.x,pacman.y,pacman.a,pacman.h);
+                }
+                
+            });
+            
+            ctx.drawImage(imgPlayer,ghost.x,ghost.y,ghost.a,ghost.h);
+
+
+
+            update();
+            requestAnimationFrame(showGame);
+        }
+
+        requestAnimationFrame(showGame);
 
     </script>
 </body>
+
 </html>
