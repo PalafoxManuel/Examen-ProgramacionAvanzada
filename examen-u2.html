@@ -95,18 +95,22 @@
         const ghost = new player(250, 850, 30, 30, imgPlayer, speed);
 
         for(i=0; i<=20;i++){
-            while(!isOut){
-                spawnx = Math.random() < 0.5 ? -35 : 800;
-                spawny = Math.floor(Math.random()* 790);
+            setTimeout(() => {
+            spawnx = Math.random() < 0.5 ? -35 : 800;
+            spawny = Math.floor(Math.random()* 730);
+
+            spawny += 75;
+
+            const direction = spawnx === -35 ? "right" : "left";
+
+            pacmans.push(new enemy(spawnx, spawny, 35, 35, imgEnemy, speed, direction));
+            isOut = true;
 
 
-
-                const direction = spawnx === -35 ? "right" : "left";
-
-                pacmans.push(new enemy(spawnx, spawny, 35, 35, imgEnemy, speed, direction));
-                isOut = true;
+            }, i * 1000);
+            /*while(!isOut){
             }
-            isOut=false;
+            isOut=false;*/
         }
 
         // Teclas de juego
@@ -167,7 +171,7 @@
                 if(pacman.direction === "right") {
                     ctx.save();
                     ctx.scale(-1, 1);
-
+                    
                     ctx.drawImage(imgEnemy, -pacman.x - pacman.a,pacman.y,pacman.a,pacman.h);
                     ctx.restore();
                 }else{
