@@ -78,6 +78,8 @@
 <body>
     <canvas id="my_canvas" width="800" height="900"></canvas>
 
+    <audio id="ambientMusic" src="organs.mp3" loop></audio>
+
     <!-- Pop up de carga -->
     <div id="loadingPopup" class="menu">
         <h2>Loading Pacmans...</h2>
@@ -125,6 +127,16 @@
     </div>
 
     <script type="text/javascript">
+        const ambientMusic = document.getElementById('ambientMusic');
+
+        function playMusic() {
+            ambientMusic.play().catch(error => {
+                console.log('Error playing music: ', error);
+            });
+        }
+
+        document.addEventListener('click', playMusic, { once: true });
+
         const my_canvas = document.getElementById('my_canvas')
         const ctx = my_canvas.getContext('2d')
 
@@ -146,6 +158,7 @@
 
         const winnerAudio = new Audio("winner-Audio.mp3");
         const looserAudio = new Audio("loose-Audio.mp3");
+        const coinAudio = new Audio("coin-Audio.mp3")
 
         const imgPlayer = new Image();
         const imgEnemy = new Image();
@@ -471,6 +484,9 @@
                         }
 
                         if(ghost.colision(coin) && !coin.collected) {
+                            coinAudio.pause();
+                            coinAudio.play();
+
                             coin.collected = true;
                             score +=10;
                         }
@@ -496,10 +512,18 @@
             requestAnimationFrame(showGame);
         }
 
+
         spawnCoins();
         updateLevelSettings();
         spawnPacmans();
         requestAnimationFrame(showGame);
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const ambientMusic = document.getElementById('ambientMusic');
+            ambientMusic.play().catch(error => {
+                console.log('Error playing music: ', error);
+            });
+        });
 
     </script>
 </body>
