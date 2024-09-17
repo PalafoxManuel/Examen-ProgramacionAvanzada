@@ -78,7 +78,7 @@
 <body>
     <canvas id="my_canvas" width="800" height="900"></canvas>
 
-    <audio id="ambientMusic" src="organs.mp3" loop></audio>
+    <audio id="ambientMusic" src="Audios/organs.mp3" loop></audio>
 
     <!-- Pop up de carga -->
     <div id="loadingPopup" class="menu">
@@ -131,6 +131,7 @@
         const ambientMusic = document.getElementById('ambientMusic');
 
         function playMusic() {
+            ambientMusic.volume=0.15;
             ambientMusic.play().catch(error => {
                 console.log('Error playing music: ', error);
             });
@@ -157,9 +158,13 @@
         var spawnx = 0;
         var spawny = 0;
 
-        const winnerAudio = new Audio("winner-Audio.mp3");
-        const looserAudio = new Audio("loose-Audio.mp3");
-        const coinAudio = new Audio("coin-Audio.mp3")
+        const winnerAudio = new Audio("Audios/winner-Audio.mp3");
+        const looserAudio = new Audio("Audios/loose-Audio.mp3");
+        const coinAudio = new Audio("Audios/coin-Audio.mp3")
+
+        winnerAudio.volume=0.15;
+        looserAudio.volume=0.15;
+        coinAudio.volume=0.15;
 
         const imgPlayer = new Image();
         const imgEnemy = new Image();
@@ -169,13 +174,13 @@
         const inky = new Image();
         const pinky = new Image();
         
-        imgPlayer.src = "red.png";
-        imgEnemy.src = "evilPacman.png";
-        imgCoin.src = "MonedaD.png";
+        imgPlayer.src = "sources/red.png";
+        imgEnemy.src = "sources/evilPacman.png";
+        imgCoin.src = "sources/MonedaD.png";
 
-        clyde.src = "clyde.png";
-        inky.src = "inky.png";
-        pinky.src = "pinky.png";
+        clyde.src = "sources/clyde.png";
+        inky.src = "sources/inky.png";
+        pinky.src = "sources/pinky.png";
 
         // Clases
 
