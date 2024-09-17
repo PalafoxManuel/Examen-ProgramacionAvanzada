@@ -11,6 +11,8 @@
     <style type="text/css">
         canvas {
             background-color: rgb(18, 18, 20);
+            display: block;
+            margin: 0 auto;
         }
         body {
             background-color: darkgray;
@@ -20,7 +22,7 @@
             display: none;
             position: absolute;
             top: 50%;
-            left: 20%;
+            left: 50%;
             transform: translate(-50%, -50%);
             background-color: rgba(0, 0, 0, 0.8);
             padding: 20px;
@@ -62,6 +64,13 @@
 <body>
     <canvas id="my_canvas" width="800" height="900"></canvas>
 
+    <!-- Pop up perdedor -->
+    <div id="loosePopup" class="menu">
+        <h2>Game Over</h2>
+        <button onclick="resetGame()">Retry Level</button>
+        <button onclick="window.location.href='index.html'">Back to Menu</button>
+    </div>
+
     <!-- Pop up nivel maximo -->
      <div id="maxLevelPopup" class="menu">
         <h2>Maximum level reached, thanks for playing!</h2>
@@ -102,6 +111,7 @@
 
         // Declaracion de variables 
         var pacmans= [];
+        var coins = [];
         var levelActual = 1;
         var numPacmansLevel = 0;
         var direction = "";
@@ -114,13 +124,24 @@
         var spawnx = 0;
         var spawny = 0;
 
+        const winnerAudio = new Audio("winner-Audio.mp3");
+        const looserAudio = new Audio("loose-Audio.mp3");
+
         const imgPlayer = new Image();
         const imgEnemy = new Image();
+        const imgCoin = new Image();
 
+        const clyde = new Image();
+        const inky = new Image();
+        const pinky = new Image();
+        
         imgPlayer.src = "red.png";
         imgEnemy.src = "evilPacman.png";
+        imgCoin.src = "MonedaD.png";
 
-
+        clyde.src = "clyde.png";
+        inky.src = "inky.png";
+        pinky.src = "pinky.png";
 
         // Clases
 
@@ -189,6 +210,17 @@
             }
         }
 
+        class Coin {
+            constructor(x, y, h, a, image) {
+                this.x = x;
+                this.y = y;
+                this.h = h;
+                this.a = a;
+                this.image = image;
+                this.collected = false;
+            }
+        }
+
         // Pausar juego
         function pauseGame() {
             pause = !pause;
@@ -200,16 +232,32 @@
         }   
 
         // Crear zona para ganar
-        const winZone1 = new winZone(380, 0, 30, 30, 'green');
+        const winZone1 = new winZone(340, 0, 40, 40, 'green');
+        const winZone2 = new winZone(380, 0, 40, 40, 'green');
+        const winZone3 = new winZone(420, 0, 40, 40, 'green');
 
         // Mensaje de victoria
         function checkWin() {
-            if(ghost.x < winZone1.x + winZone1.a 
-            && ghost.x + ghost.a > winZone1.x 
-            && ghost.y < winZone1.y + winZone1.h 
-            && ghost.y + ghost.h > winZone1.y){
+            if (
+                (ghost.x < winZone1.x + winZone1.a && ghost.x + ghost.a > winZone1.x && ghost.y < winZone1.y + winZone1.h && ghost.y + ghost.h > winZone1.y) ||
+                (ghost.x < winZone2.x + winZone2.a && ghost.x + ghost.a > winZone2.x && ghost.y < winZone2.y + winZone2.h && ghost.y + ghost.h > winZone2.y) ||
+                (ghost.x < winZone3.x + winZone3.a && ghost.x + ghost.a > winZone3.x && ghost.y < winZone3.y + winZone3.h && ghost.y + ghost.h > winZone3.y)
+                ){
                 pause = true;
+                winnerAudio.pause();
+                winnerAudio.play();
                 document.getElementById('winPopup').style.display = 'block'
+            }
+        }
+
+        // Mensaje al perder
+        function checkLoose() {
+            if(looser) {
+                pause = true;
+                score=0;
+                looserAudio.pause();
+                looserAudio.play();
+                document.getElementById('loosePopup').style.display = 'Block';
             }
         }
 
@@ -218,7 +266,12 @@
             ghost.resetPlayer();
             direction="";
             pacmans= [];
+            coins = [];
             spawnPacmans();
+            spawnCoins();
+            looser = false;
+            document.getElementById('loosePopup').style.display = 'none';
+            pause = false;
         }
 
         // Avanzar de nivel
@@ -248,7 +301,7 @@
 
         // Crear pacmans
         function spawnPacmans() {
-            for(i=0; i<=numPacmansLevel;i++){
+            for(let i=0; i<=numPacmansLevel;i++){
                 setTimeout(() => {
                 spawnx = Math.random() < 0.5 ? -35 : 800;
                 spawny = Math.floor(Math.random()* 730);
@@ -260,6 +313,15 @@
                 pacmans.push(new enemy(spawnx, spawny, 35, 35, imgEnemy, speedEnemy, direction));
     
                 }, i * 1000);
+            }
+        }
+
+        function spawnCoins() {
+            for(let i = 0; i<10; i++){
+                const x = Math.floor(Math.random() * (800 - 30));
+                const y = Math.floor(Math.random() * (900 - 100)) + 50;
+                
+                coins.push(new Coin(x,y,30,30, imgCoin));
             }
         }
 
@@ -330,13 +392,14 @@
                         ghost.x = 775;
                     }
                 }
-
             }
+
             pacmans.forEach(function(pacman) {
                 if(ghost.colision(pacman)) {
                     ghost.resetPlayer();
                     direction = "";
                     looser = true;
+                    checkLoose();
                 }
             });
         }
@@ -364,9 +427,21 @@
                             }
                     });
 
-                ctx.fillStyle = "green";
-                ctx.fillRect(winZone1.x, winZone1.y, winZone1.a, winZone1.h);
-                        
+                    coins.forEach((coin, index) => {
+                        if(!coin.collected) {
+                            ctx.drawImage(imgCoin, coin.x, coin.y, coin.a, coin.h)
+                        }
+
+                        if(ghost.colision(coin) && !coin.collected) {
+                            coin.collected = true;
+                            score +=10;
+                        }
+                    });
+
+                ctx.drawImage(clyde, winZone1.x, winZone1.y, winZone1.a, winZone1.h);
+                ctx.drawImage(inky, winZone2.x, winZone2.y, winZone2.a, winZone2.h);
+                ctx.drawImage(pinky, winZone3.x, winZone3.y, winZone3.a, winZone3.h);    
+                
                 ctx.drawImage(imgPlayer,ghost.x,ghost.y,ghost.a,ghost.h);
     
                 ctx.fillStyle = "white";
@@ -377,11 +452,13 @@
                 ctx.fillText("level "+level,20,30);
     
                 update();
+                checkLoose();
                 checkWin();
             }
             requestAnimationFrame(showGame);
         }
 
+        spawnCoins();
         updateLevelSettings();
         spawnPacmans();
         requestAnimationFrame(showGame);
